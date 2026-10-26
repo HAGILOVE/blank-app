@@ -1,0 +1,1 @@
+"""WARPZIP GUI (PySide6)."""

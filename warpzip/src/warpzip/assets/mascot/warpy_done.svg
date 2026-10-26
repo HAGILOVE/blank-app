@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 256 256" width="256" height="256">
+  <ellipse cx="128" cy="226" rx="62" ry="9" fill="#7C5CFF" opacity=".16"/>
+  <rect x="116" y="26" width="24" height="44" rx="12" fill="#FF8FB8" stroke="#3B2A6B" stroke-width="8"/>
+  <circle cx="128" cy="40" r="4.4" fill="#fff"/>
+  <rect x="44" y="56" width="168" height="162" rx="76" fill="#FFF8F0" stroke="#3B2A6B" stroke-width="8"/>
+  <ellipse cx="76" cy="152" rx="14" ry="9" fill="#FF8FB8" opacity=".75"/>
+  <ellipse cx="180" cy="152" rx="14" ry="9" fill="#FF8FB8" opacity=".75"/>
+  <path d="M87,129 Q98,114 109,129" fill="none" stroke="#3B2A6B" stroke-width="8" stroke-linecap="round"/><path d="M147,129 Q158,114 169,129" fill="none" stroke="#3B2A6B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M110,146 Q128,172 146,146 Z" fill="#3B2A6B" stroke="#3B2A6B" stroke-width="6" stroke-linejoin="round"/><path d="M118,156 Q128,164 138,156" fill="none" stroke="#FF8FB8" stroke-width="5" stroke-linecap="round"/>
+  <g transform="translate(42,82)" fill="#FFD166"><path d="M0,-10 C1.2,-3 3,-1.2 10,0 C3,1.2 1.2,3 0,10 C-1.2,3 -3,1.2 -10,0 C-3,-1.2 -1.2,-3 0,-10 Z"/></g><g transform="translate(218,110) scale(.7)" fill="#5EEAD4"><path d="M0,-10 C1.2,-3 3,-1.2 10,0 C3,1.2 1.2,3 0,10 C-1.2,3 -3,1.2 -10,0 C-3,-1.2 -1.2,-3 0,-10 Z"/></g><g transform="translate(212,200) scale(.8)" fill="#FF8FB8"><path d="M0,-10 C1.2,-3 3,-1.2 10,0 C3,1.2 1.2,3 0,10 C-1.2,3 -3,1.2 -10,0 C-3,-1.2 -1.2,-3 0,-10 Z"/></g></svg>

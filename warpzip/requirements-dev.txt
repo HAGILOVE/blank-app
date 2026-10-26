@@ -1,0 +1,6 @@
+-r requirements.txt
+pytest>=8
+pytest-qt>=4.4
+pillow>=10        # tools/make_assets.py (ICO / installer art)
+pyinstaller>=6.6  # Windows build
+ruff>=0.5

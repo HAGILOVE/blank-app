@@ -1,0 +1,36 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "warpzip"
+version = "1.0.0"
+description = "WARPZIP (워프집) - a cute, fast and secure archive manager for Windows"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "PySide6-Essentials>=6.7,<7",
+    "py7zr>=0.22",
+    "pyzipper>=0.3.6",
+    "zstandard>=0.22",
+]
+
+[project.scripts]
+warpzip = "warpzip.__main__:main"
+
+[project.gui-scripts]
+warpzip-gui = "warpzip.__main__:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+warpzip = ["assets/**/*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["ignore::DeprecationWarning"]
+
+[tool.ruff]
+line-length = 130
+target-version = "py310"

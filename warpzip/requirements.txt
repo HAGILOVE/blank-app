@@ -1,0 +1,4 @@
+PySide6-Essentials>=6.7,<7
+py7zr>=0.22
+pyzipper>=0.3.6
+zstandard>=0.22
