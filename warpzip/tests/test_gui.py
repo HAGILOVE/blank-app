@@ -1,6 +1,6 @@
 """GUI smoke / behaviour tests (offscreen Qt)."""
 import json
-import threading
+import os
 import time
 from pathlib import Path
 
@@ -237,17 +237,33 @@ def test_drop_archive_opens_it(env, zip_file, qtbot):
 
 
 def test_single_instance_forwarding(qapp, qtbot, monkeypatch):
+    """A real second process connects, sends its arguments and exits - exactly what Explorer does."""
+    import subprocess
+    import sys
     from warpzip import app as appmod
-    monkeypatch.setattr(appmod, "SERVER_NAME", "WarpZip-test-single-%d" % time.time_ns())
+
+    name = "WarpZip-test-single-%d" % time.time_ns()
+    monkeypatch.setattr(appmod, "SERVER_NAME", name)
     si = appmod.SingleInstance()
-    result = []
-    # the sender blocks until the server acks, so (like the real second process) it must not share our event loop
-    t = threading.Thread(target=lambda: result.append(appmod.forward_to_running(["--compress", "C:\\a b\\c.txt"])))
-    with qtbot.waitSignal(si.received, timeout=8000) as sig:
-        t.start()
-    t.join(8)
-    assert result == [True]
-    assert sig.args[0] == ["--compress", "C:\\a b\\c.txt"]
+    code = (
+        "import sys\n"
+        "from PySide6.QtCore import QCoreApplication\n"
+        "app = QCoreApplication([])\n"
+        "from warpzip import app as m\n"
+        f"m.SERVER_NAME = {name!r}\n"
+        "ok = m.forward_to_running(['--compress', 'C:\\\\a b\\\\c.txt', '\ud55c\uae00.txt'])\n"
+        "print('forwarded', ok)\n"
+        "sys.exit(0 if ok else 3)\n"
+    )
+    env = dict(os.environ, PYTHONPATH=str(Path(__file__).resolve().parents[1] / "src"), QT_QPA_PLATFORM="offscreen",
+               PYTHONIOENCODING="utf-8")
+    proc = subprocess.Popen([sys.executable, "-c", code], env=env, stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+    with qtbot.waitSignal(si.received, timeout=30000, raising=False) as sig:
+        pass
+    out = proc.communicate(timeout=30)[0].decode("utf-8", "replace")
+    assert sig.signal_triggered, f"server never received the message; child said:\n{out}"
+    assert sig.args[0] == ["--compress", "C:\\a b\\c.txt", "\ud55c\uae00.txt"], out
+    assert proc.returncode == 0, out
 
 
 def test_strength_meter():

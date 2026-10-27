@@ -29,7 +29,7 @@ GUI_FLAGS = {"--compress", "--quick-zip", "--quick-7z", "--extract", "--extract-
 def forward_to_running(argv: List[str]) -> bool:
     sock = QLocalSocket()
     sock.connectToServer(SERVER_NAME)
-    if not sock.waitForConnected(250):
+    if not sock.waitForConnected(500):
         return False
     sock.write(json.dumps(argv).encode("utf-8") + b"\n")
     sock.flush()
@@ -51,21 +51,32 @@ class SingleInstance(QObject):
             self.server.listen(SERVER_NAME)
 
     def _on_conn(self) -> None:
-        sock = self.server.nextPendingConnection()
-        if sock is None:
-            return
-        data = b""
-        while b"\n" not in data and sock.waitForReadyRead(1000):
-            data += bytes(sock.readAll())
-        data += bytes(sock.readAll())
-        sock.write(b"1")                 # ack
-        sock.flush()
-        sock.waitForBytesWritten(500)
-        sock.disconnectFromServer()
-        try:
-            self.received.emit(json.loads(data.decode("utf-8")))
-        except (ValueError, UnicodeDecodeError):
-            pass
+        # Fully asynchronous: never block the GUI thread waiting on the pipe (unreliable on Windows).
+        while True:
+            sock = self.server.nextPendingConnection()
+            if sock is None:
+                return
+            buf = bytearray()
+
+            def on_ready(sock=sock, buf=buf) -> None:
+                buf.extend(bytes(sock.readAll()))
+                if b"\n" not in buf:
+                    return
+                sock.readyRead.disconnect()
+                try:
+                    argv = json.loads(bytes(buf).decode("utf-8"))
+                except (ValueError, UnicodeDecodeError):
+                    argv = None
+                sock.write(b"1")             # ack: lets the sender close the pipe safely
+                sock.flush()
+                sock.disconnectFromServer()
+                if isinstance(argv, list):
+                    self.received.emit(argv)
+
+            sock.readyRead.connect(on_ready)
+            sock.disconnected.connect(sock.deleteLater)
+            if sock.bytesAvailable():
+                on_ready()
 
 
 class WarpApp(QObject):
