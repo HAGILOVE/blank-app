@@ -15,20 +15,22 @@ defaults:
 jobs:
   test-linux:
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with: { python-version: "3.12" }
       - name: System libraries for Qt offscreen + 7z
-        run: sudo apt-get update && sudo apt-get install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1 p7zip-full fonts-noto-cjk
+        timeout-minutes: 8
+        run: sudo apt-get -o Acquire::Retries=3 update && sudo apt-get -o Acquire::Retries=3 install -y libegl1 libgl1 libxkbcommon0 libdbus-1-3 libfontconfig1 p7zip-full fonts-noto-cjk
         working-directory: .
       - run: pip install -r requirements-dev.txt
       - run: pytest -q
         env: { QT_QPA_PLATFORM: offscreen }
 
   build-windows:
-    needs: test-linux
     runs-on: windows-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -71,6 +73,7 @@ jobs:
   release:
     if: startsWith(github.ref, 'refs/tags/v')
     needs: build-windows
+    timeout-minutes: 10
     runs-on: ubuntu-latest
     permissions: { contents: write }
     steps:
