@@ -1,5 +1,6 @@
 """GUI smoke / behaviour tests (offscreen Qt)."""
 import json
+import threading
 import time
 from pathlib import Path
 
@@ -239,8 +240,13 @@ def test_single_instance_forwarding(qapp, qtbot, monkeypatch):
     from warpzip import app as appmod
     monkeypatch.setattr(appmod, "SERVER_NAME", "WarpZip-test-single-%d" % time.time_ns())
     si = appmod.SingleInstance()
-    with qtbot.waitSignal(si.received, timeout=3000) as sig:
-        assert appmod.forward_to_running(["--compress", "C:\\a b\\c.txt"])
+    result = []
+    # the sender blocks until the server acks, so (like the real second process) it must not share our event loop
+    t = threading.Thread(target=lambda: result.append(appmod.forward_to_running(["--compress", "C:\\a b\\c.txt"])))
+    with qtbot.waitSignal(si.received, timeout=8000) as sig:
+        t.start()
+    t.join(8)
+    assert result == [True]
     assert sig.args[0] == ["--compress", "C:\\a b\\c.txt"]
 
 

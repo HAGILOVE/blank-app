@@ -6,6 +6,7 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
+os.environ.setdefault("QT_LOGGING_RULES", "qt.text.font.db=false;qt.qpa.fonts=false")
 
 
 @pytest.fixture

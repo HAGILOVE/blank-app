@@ -233,7 +233,7 @@ def test_overwrite_policies(sample, tmp_path):
         extract(rd, dest, opts=ExtractOptions(folder_mode="never", overwrite="rename"))
         assert (dest / "data" / "a (1).txt").exists() and f.read_text() == "changed"
         extract(rd, dest, opts=ExtractOptions(folder_mode="never", overwrite="overwrite"))
-        assert f.read_text().startswith("hello")
+        assert f.read_text(encoding="utf-8").startswith("hello")
         f.write_text("newer than archive")
         os.utime(f, (4_000_000_000, 4_000_000_000))
         extract(rd, dest, opts=ExtractOptions(folder_mode="never", overwrite="newer"))

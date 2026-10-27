@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import getpass
 import json
+import os
 import sys
 from pathlib import Path
 from typing import Dict, List, Optional
@@ -30,9 +31,10 @@ def forward_to_running(argv: List[str]) -> bool:
     sock.connectToServer(SERVER_NAME)
     if not sock.waitForConnected(250):
         return False
-    sock.write(json.dumps(argv).encode("utf-8"))
+    sock.write(json.dumps(argv).encode("utf-8") + b"\n")
     sock.flush()
-    sock.waitForBytesWritten(1000)
+    sock.waitForBytesWritten(2000)
+    sock.waitForReadyRead(2000)          # wait for the ack so the pipe is not closed under unread data
     sock.disconnectFromServer()
     return True
 
@@ -52,8 +54,13 @@ class SingleInstance(QObject):
         sock = self.server.nextPendingConnection()
         if sock is None:
             return
-        sock.waitForReadyRead(500)
-        data = bytes(sock.readAll())
+        data = b""
+        while b"\n" not in data and sock.waitForReadyRead(1000):
+            data += bytes(sock.readAll())
+        data += bytes(sock.readAll())
+        sock.write(b"1")                 # ack
+        sock.flush()
+        sock.waitForBytesWritten(500)
         sock.disconnectFromServer()
         try:
             self.received.emit(json.loads(data.decode("utf-8")))
@@ -166,6 +173,7 @@ def _set_app_id() -> None:
 
 
 def run_gui(argv: List[str]) -> int:
+    os.environ.setdefault("QT_LOGGING_RULES", "qt.text.font.db=false;qt.qpa.fonts=false")
     _set_app_id()
     app = QApplication.instance() or QApplication(sys.argv[:1])
     app.setApplicationName(APP_NAME)
