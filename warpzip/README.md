@@ -51,7 +51,8 @@ pytest -q                          # 79개 테스트 (Qt는 offscreen)
 
 ```powershell
 # (선택) RAR/ISO/CAB 지원: 7-Zip의 7z.exe + 7z.dll 을 warpzip\bin\ 에 복사
-.\packaging\build_windows.ps1        # PyInstaller → dist\WarpZip\{WarpZip.exe, wz.exe}
+# 가장 쉬운 방법: packaging\build_windows.bat 더블클릭  (.ps1 은 더블클릭하면 "연결 프로그램" 창이 떠요)
+powershell -ExecutionPolicy Bypass -File .\packaging\build_windows.ps1   # PyInstaller → dist\WarpZip\{WarpZip.exe, wz.exe}
                                      # Inno Setup이 있으면 dist\WarpZip-<ver>-setup.exe 까지 생성
 ```
 
