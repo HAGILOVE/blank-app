@@ -8,3 +8,5 @@ __pycache__/
 .pytest_cache/
 bin/
 *.warp-part
+!packaging/warpzip.spec
+.ruff_cache/
