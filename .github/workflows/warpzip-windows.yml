@@ -43,11 +43,19 @@ jobs:
           choco install 7zip -y --no-progress
           New-Item bin -ItemType Directory -Force | Out-Null
           Copy-Item "C:\Program Files\7-Zip\7z.exe", "C:\Program Files\7-Zip\7z.dll", "C:\Program Files\7-Zip\License.txt" bin\
-      - name: Korean installer language
+      - name: Inno Setup + Korean installer language (optional)
         shell: pwsh
         run: |
-          choco install innosetup -y --no-progress
-          Invoke-WebRequest "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Korean.isl" -OutFile "C:\Program Files (x86)\Inno Setup 6\Languages\Korean.isl"
+          if (-not (Test-Path "C:\Program Files (x86)\Inno Setup 6\ISCC.exe")) { choco install innosetup -y --no-progress }
+          $dir = "C:\Program Files (x86)\Inno Setup 6\Languages"
+          if (-not (Test-Path "$dir\Korean.isl")) {
+            foreach ($u in @(
+              "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Korean.isl",
+              "https://raw.githubusercontent.com/jrsoftware/issrc/main/Files/Languages/Unofficial/Korean.isl")) {
+              try { Invoke-WebRequest $u -OutFile "$dir\Korean.isl"; Write-Host "Korean.isl from $u"; break } catch { Write-Warning "no Korean.isl at $u" }
+            }
+          }
+          $global:LASTEXITCODE = 0
       - name: Build (PyInstaller + Inno Setup + portable zip)
         shell: pwsh
         run: ./packaging/build_windows.ps1 -Version "1.0.${{ github.run_number }}"
